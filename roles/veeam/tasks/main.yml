@@ -1,0 +1,22 @@
+---
+- name: Downloaded Veeam repository
+  get_url: url=http://repo.veeam.com/backup/linux/agent/debian/pool/veeam/v/veeam-release/veeam-release_1.0.1_all.deb dest=/tmp/veeam-release_1.0.1_all.deb
+
+- name: Installing Veeam repository
+  apt: deb=/tmp/veeam-release_1.0.1_all.deb update_cache=yes
+
+- name: Installing Veeam software
+  apt: name=veeamsnap,veeamlpb state=present force=yes
+
+- name: Creating backup repository mount point
+  file: path={{ BACKUP_MOUNT_POINT }} state=directory mode=0755
+
+- name: Mounting NFS backup repository
+  mount: name={{ BACKUP_MOUNT_POINT }} src={{ BACKUP_STORAGE_NFS }} fstype=nfs state=mounted
+  when: BACKUP_STORAGE_NFS
+
+- name: Veeam creating backup repository
+  command: veeamlpbconfig repository create --name "Backup repository" --location {{ BACKUP_MOUNT_POINT }}
+
+- name: Veeam creating backup job
+  command: veeamlpbconfig job create --name "backup-from-ansible" --repoName "Backup repository" --maxPoints 7 --objects {{ BACKUP_SOURCES }}

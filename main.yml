@@ -1,0 +1,23 @@
+---
+- hosts: home
+  vars_prompt:
+    - name: 'BACKUP_MOUNT_POINT'
+      prompt: 'Local backup repository mountpoint'
+      default: '/data/backup'
+      private: no
+    - name: 'BACKUP_STORAGE_NFS'
+      prompt: 'NFS path to mount (optional)'
+      private: no
+    - name: 'BACKUP_SOURCES'
+      prompt: 'Source disks to backup (comma separated)'
+      default: 'sda'
+      private: no
+
+  pre_tasks:
+    - shell: echo "hello world"
+
+  roles:
+    - { role: veeam }
+  
+  post_tasks:
+    - shell: echo "goodbye"
